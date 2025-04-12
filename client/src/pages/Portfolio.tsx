@@ -10,6 +10,7 @@ import ParallaxSection from '@/components/ParallaxSection';
 import ParticleTextMorphing from '@/components/ParticleTextMorphing';
 import InteractiveTimeline from '@/components/InteractiveTimeline';
 import SkillsVisualization from '@/components/SkillsVisualization';
+import ThreeJSBackground from '@/components/ThreeJSBackground';
 
 interface PortfolioProps {
   theme: 'light' | 'dark';
@@ -18,7 +19,10 @@ interface PortfolioProps {
 
 const Portfolio: FC<PortfolioProps> = ({ theme, toggleTheme }) => {
   return (
-    <div className="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <div className="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300 relative">
+      {/* Dynamic 3D background with particles */}
+      <ThreeJSBackground theme={theme} />
+      
       <Navbar theme={theme} toggleTheme={toggleTheme} />
       <Hero />
       <ParticleTextMorphing />

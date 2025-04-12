@@ -3,6 +3,11 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Portfolio from "@/pages/Portfolio";
 import { useEffect, useState } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// Register GSAP plugins
+gsap.registerPlugin(ScrollTrigger);
 
 // Add scroll animation observer function
 function setupScrollAnimations() {

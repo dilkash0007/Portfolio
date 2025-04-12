@@ -1,8 +1,6 @@
-import { FC, useEffect, useRef } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface TimelineItem {
   year: string;
@@ -13,268 +11,210 @@ interface TimelineItem {
 }
 
 const InteractiveTimeline: FC = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
+  const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
   
-  const timelineData: TimelineItem[] = [
+  // Timeline data
+  const timelineItems: TimelineItem[] = [
     {
-      year: "2019",
-      title: "Started Web Development Journey",
-      description: "Began learning HTML, CSS, and JavaScript fundamentals and built my first static websites.",
-      icon: "fas fa-rocket",
-      color: "bg-blue-500"
+      year: '2019',
+      title: 'Started Web Development Journey',
+      description: 'Began learning HTML, CSS, and JavaScript fundamentals through online courses and self-study. Created my first simple websites and web applications.',
+      icon: '🚀',
+      color: '#4299E1'
     },
     {
-      year: "2020",
-      title: "Front-end Framework Mastery",
-      description: "Dived deep into React.js and built several interactive web applications.",
-      icon: "fab fa-react",
-      color: "bg-blue-400"
+      year: '2020',
+      title: 'First Freelance Projects',
+      description: 'Completed several freelance projects for local clients in Ranchi, including business websites and e-commerce platforms. Started learning React and modern JavaScript frameworks.',
+      icon: '💼',
+      color: '#F6AD55'
     },
     {
-      year: "2021",
-      title: "Full Stack Development",
-      description: "Expanded skills to include Node.js, Express, and MongoDB to create complete web solutions.",
-      icon: "fas fa-layer-group",
-      color: "bg-green-500"
+      year: '2021',
+      title: 'Full Stack Development',
+      description: 'Expanded skills to include backend technologies like Node.js, Express, and MongoDB. Developed full-stack applications with complete authentication and database integration.',
+      icon: '⚙️',
+      color: '#48BB78'
     },
     {
-      year: "2022",
-      title: "Modern Web Techniques",
-      description: "Mastered advanced animations, state management, and responsive design principles.",
-      icon: "fas fa-wand-magic-sparkles",
-      color: "bg-purple-500"
+      year: '2022',
+      title: 'Professional Development',
+      description: 'Joined a development team working on large-scale applications. Improved skills in team collaboration, version control, and agile methodologies. Started exploring UI/UX design principles.',
+      icon: '🔄',
+      color: '#9F7AEA'
     },
     {
-      year: "2023",
-      title: "Freelance Web Developer",
-      description: "Started offering professional web development services to clients around Ranchi.",
-      icon: "fas fa-briefcase",
-      color: "bg-orange-500"
+      year: '2023',
+      title: 'Advanced Frontend Technologies',
+      description: 'Mastered React ecosystem with Redux, Next.js, and TypeScript. Developed expertise in modern CSS techniques, animations, and responsive design. Created complex interactive web experiences.',
+      icon: '✨',
+      color: '#F56565'
+    },
+    {
+      year: '2024',
+      title: 'Creative Development & 3D Web',
+      description: 'Focused on creative development using Three.js, GSAP, and WebGL. Created immersive web experiences with 3D elements and advanced animations. Started sharing knowledge through technical blog posts.',
+      icon: '🔮',
+      color: '#ED8936'
+    },
+    {
+      year: '2025',
+      title: 'Current Projects & Future Vision',
+      description: 'Currently working on innovative web projects with cutting-edge technologies. Focused on performance optimization, accessibility, and creating memorable user experiences. Open to new opportunities and collaborations.',
+      icon: '🌟',
+      color: '#667EEA'
     }
   ];
   
+  // Setup the timeline animations
   useEffect(() => {
-    if (!sectionRef.current || !timelineRef.current) return;
+    gsap.registerPlugin(ScrollTrigger);
     
-    const timeline = timelineRef.current;
-    const items = timeline.querySelectorAll('.timeline-item');
-    const connector = timeline.querySelector('.timeline-connector');
-    
-    // Title animation
-    const title = sectionRef.current.querySelector('h2');
-    if (title) {
+    if (timelineRef.current) {
+      // Create the timeline line animation
       gsap.fromTo(
-        title,
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          scrollTrigger: {
-            trigger: title,
-            start: 'top 80%',
-          }
-        }
-      );
-    }
-    
-    // Connector line animation
-    if (connector) {
-      gsap.fromTo(
-        connector,
-        { scaleY: 0 },
+        '.timeline-line',
+        { scaleY: 0, transformOrigin: 'top' },
         {
           scaleY: 1,
           duration: 1.5,
-          ease: "power2.out",
+          ease: 'power3.out',
           scrollTrigger: {
-            trigger: timeline,
+            trigger: timelineRef.current,
             start: 'top 70%',
+            end: 'bottom 30%',
+            toggleActions: 'play none none none'
           }
         }
       );
-    }
-    
-    // Animate each timeline item
-    items.forEach((item, index) => {
-      const itemContent = item.querySelector('.timeline-content');
-      const dot = item.querySelector('.timeline-dot');
-      const icon = item.querySelector('.timeline-icon');
-      const year = item.querySelector('.timeline-year');
-      const content = item.querySelector('.timeline-details');
       
-      // Create a timeline for this item
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: item,
-          start: 'top 75%',
-        }
-      });
-      
-      // Dot animation
-      if (dot) {
-        tl.fromTo(
-          dot,
-          { scale: 0, opacity: 0 },
-          {
-            scale: 1,
-            opacity: 1,
-            duration: 0.5,
-            ease: "back.out(1.7)"
-          }
-        );
-      }
-      
-      // Icon animation
-      if (icon) {
-        tl.fromTo(
-          icon,
-          { opacity: 0, rotateY: -90 },
-          {
-            opacity: 1,
-            rotateY: 0,
-            duration: 0.6,
-            ease: "back.out(1.7)"
-          },
-          "-=0.2"
-        );
-      }
-      
-      // Year animation
-      if (year) {
-        tl.fromTo(
-          year,
-          { opacity: 0, x: index % 2 === 0 ? -30 : 30 },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.5
-          },
-          "-=0.3"
-        );
-      }
-      
-      // Content animation
-      if (content) {
-        tl.fromTo(
-          content,
-          { opacity: 0, y: 20 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.5
-          },
-          "-=0.2"
-        );
-      }
-      
-      // Add hover animations
-      if (itemContent) {
-        itemContent.addEventListener('mouseenter', () => {
-          gsap.to(itemContent, {
-            y: -5,
-            boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)",
-            duration: 0.3
-          });
+      // Animate each timeline item
+      itemsRef.current.forEach((item, index) => {
+        if (item) {
+          // Staggered appearance of items
+          gsap.fromTo(
+            item,
+            { 
+              opacity: 0, 
+              x: index % 2 === 0 ? -50 : 50 
+            },
+            {
+              opacity: 1,
+              x: 0,
+              duration: 0.8,
+              delay: index * 0.2,
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: item,
+                start: 'top 80%',
+                toggleActions: 'play none none none'
+              }
+            }
+          );
           
-          if (icon) {
-            gsap.to(icon, {
-              rotate: "+=360",
-              duration: 1,
-              ease: "power2.out"
-            });
-          }
-        });
-        
-        itemContent.addEventListener('mouseleave', () => {
-          gsap.to(itemContent, {
-            y: 0,
-            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.05)",
-            duration: 0.3
-          });
-        });
-      }
-    });
-    
-    // Clean up
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-      
-      items.forEach(item => {
-        const itemContent = item.querySelector('.timeline-content');
-        if (itemContent) {
-          itemContent.removeEventListener('mouseenter', () => {});
-          itemContent.removeEventListener('mouseleave', () => {});
+          // Animate the year circles
+          gsap.fromTo(
+            item.querySelector('.year-circle'),
+            { scale: 0 },
+            {
+              scale: 1,
+              duration: 0.5,
+              delay: index * 0.2 + 0.3,
+              ease: 'back.out(1.7)',
+              scrollTrigger: {
+                trigger: item,
+                start: 'top 80%',
+                toggleActions: 'play none none none'
+              }
+            }
+          );
         }
       });
-    };
+    }
   }, []);
   
+  // Handle item hover/selection
+  const handleItemHover = (index: number) => {
+    setActiveIndex(index);
+  };
+  
   return (
-    <section 
-      ref={sectionRef} 
-      id="timeline" 
-      className="py-20 bg-gray-50 dark:bg-gray-800 overflow-hidden relative"
-    >
-      {/* Background pattern */}
-      <div className="absolute inset-0 bg-grid opacity-30"></div>
+    <div className="timeline-container relative py-16 px-4" ref={timelineRef}>
+      <h2 className="text-3xl font-bold text-center mb-16 font-poppins bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-blue-600">
+        My Journey
+      </h2>
       
-      {/* Floating decorative elements */}
-      <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-200 dark:bg-blue-900/20 rounded-full blur-3xl opacity-20"></div>
-      <div className="absolute -bottom-32 -right-20 w-80 h-80 bg-orange-200 dark:bg-orange-900/20 rounded-full blur-3xl opacity-20"></div>
+      {/* Vertical timeline line */}
+      <div className="timeline-line absolute left-1/2 top-32 bottom-32 w-1 bg-gradient-to-b from-orange-500 to-blue-600 transform -translate-x-1/2 rounded-full"></div>
       
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold font-poppins mb-4 relative inline-block">
-            My Journey
-            <span className="absolute bottom-0 left-0 w-full h-1.5 bg-orange-500 rounded transform"></span>
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Follow my path to becoming a skilled web developer and the milestones along the way.
-          </p>
-        </div>
-        
-        <div ref={timelineRef} className="relative py-8">
-          {/* Center line */}
-          <div className="timeline-connector absolute left-1/2 top-0 bottom-0 w-1 bg-gray-200 dark:bg-gray-700 -translate-x-1/2 origin-top"></div>
-          
-          {/* Timeline items */}
-          <div className="relative">
-            {timelineData.map((item, index) => (
+      {/* Timeline items */}
+      <div className="relative z-10">
+        {timelineItems.map((item, index) => (
+          <div
+            ref={(el) => (itemsRef.current[index] = el)}
+            key={index}
+            className={`timeline-item relative mb-16 flex ${
+              index % 2 === 0 ? 'flex-row-reverse' : 'flex-row'
+            }`}
+            onMouseEnter={() => handleItemHover(index)}
+            onMouseLeave={() => setActiveIndex(null)}
+          >
+            {/* Content side */}
+            <div className="w-5/12 p-4">
               <div 
-                key={index} 
-                className={`timeline-item relative mb-16 ${
-                  index % 2 === 0 ? 'ml-auto pr-12 md:pr-0 md:ml-[50%] md:pl-12 md:w-1/2' : 'mr-auto pl-12 md:pl-0 md:mr-[50%] md:pr-12 md:w-1/2 md:text-right'
-                }`}
+                className={`p-6 rounded-lg shadow-lg transform transition-all duration-300 ${
+                  activeIndex === index 
+                    ? 'scale-105 shadow-xl' 
+                    : 'scale-100'
+                } ${
+                  index % 2 === 0 
+                    ? 'rounded-tr-none' 
+                    : 'rounded-tl-none'
+                } bg-white dark:bg-gray-800`}
               >
-                {/* Timeline dot */}
-                <div className="timeline-dot absolute left-0 md:left-1/2 top-7 w-5 h-5 rounded-full bg-white dark:bg-gray-800 border-4 border-orange-500 -translate-x-1/2 z-10"></div>
-                
-                {/* Timeline content */}
-                <div className="timeline-content bg-white dark:bg-gray-900 rounded-lg p-6 shadow-md transition-all duration-300 relative">
-                  {/* Icon */}
-                  <div className={`timeline-icon absolute ${index % 2 === 0 ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'} -top-5 w-10 h-10 rounded-full flex items-center justify-center text-white shadow-lg ${item.color}`}>
-                    <i className={`${item.icon}`}></i>
-                  </div>
-                  
-                  {/* Year */}
-                  <span className="timeline-year inline-block px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded text-sm font-semibold mb-3">
-                    {item.year}
+                <div className="flex items-center mb-3">
+                  <span 
+                    className="text-2xl mr-3" 
+                    style={{ color: item.color }}
+                  >
+                    {item.icon}
                   </span>
-                  
-                  {/* Content */}
-                  <div className="timeline-details">
-                    <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                    <p className="text-gray-600 dark:text-gray-400">{item.description}</p>
-                  </div>
+                  <h3 className="text-xl font-bold">{item.title}</h3>
                 </div>
+                <p className="text-gray-600 dark:text-gray-300">
+                  {item.description}
+                </p>
               </div>
-            ))}
+            </div>
+            
+            {/* Center year marker */}
+            <div className="w-2/12 flex justify-center relative">
+              <div 
+                className="year-circle absolute top-6 w-12 h-12 rounded-full flex items-center justify-center font-bold text-white transform -translate-y-1/2 z-20"
+                style={{ 
+                  backgroundColor: item.color,
+                  boxShadow: activeIndex === index 
+                    ? `0 0 15px ${item.color}` 
+                    : 'none'
+                }}
+              >
+                {item.year}
+              </div>
+            </div>
+            
+            {/* Empty side (for alignment) */}
+            <div className="w-5/12"></div>
           </div>
-        </div>
+        ))}
       </div>
-    </section>
+      
+      {/* Final marker */}
+      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-16">
+        <div className="w-6 h-6 rounded-full bg-gradient-to-r from-orange-500 to-blue-600 animate-pulse"></div>
+      </div>
+    </div>
   );
 };
 

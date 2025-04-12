@@ -1,5 +1,4 @@
-import { FC, useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
+import React, { FC, useEffect, useRef, useState } from 'react';
 
 interface Particle {
   x: number;
@@ -16,271 +15,237 @@ const ParticleTextMorphing: FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<Particle[]>([]);
-  const mousePosRef = useRef({ x: 0, y: 0 });
-  const animationFrameRef = useRef<number | null>(null);
-  const currentTextRef = useRef<string>('DILKASH');
+  const animationFrameRef = useRef<number>(0);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   
-  const texts = ['DILKASH', 'DEVELOPER', 'DESIGNER', 'CREATIVE'];
-  const colors = ['#F97316', '#3B82F6', '#10B981', '#8B5CF6'];
+  const textOptions = [
+    'Dilkash Raja',
+    'Web Developer',
+    'UI Designer',
+    'Ranchi, India',
+    'Let\'s Connect'
+  ];
   
-  // Function to get text pixel positions
-  const getTextPixels = (
+  const colorPalettes = [
+    ['#F97316', '#F59E0B', '#D97706'], // Orange shades
+    ['#3B82F6', '#60A5FA', '#93C5FD'], // Blue shades
+    ['#10B981', '#34D399', '#6EE7B7'], // Green shades
+    ['#EC4899', '#F472B6', '#FBCFE8'], // Pink shades
+    ['#8B5CF6', '#A78BFA', '#C4B5FD']  // Purple shades
+  ];
+  
+  // Create text particles
+  const createTextParticles = (
     ctx: CanvasRenderingContext2D, 
     text: string, 
-    fontWeight: string, 
     fontSize: number,
-    fontFamily: string,
-    width: number,
-    height: number
+    colorPalette: string[]
   ) => {
-    ctx.clearRect(0, 0, width, height);
+    const particles: Particle[] = [];
+    const canvas = ctx.canvas;
     
-    ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-    ctx.fillStyle = 'white';
+    // Draw text to get pixel data
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = `bold ${fontSize}px Poppins, sans-serif`;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
     
-    ctx.fillText(text, width / 2, height / 2);
+    const textData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = textData.data;
     
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-    const pixels: { x: number; y: number }[] = [];
-    
-    // Sample the text area for non-transparent pixels
-    for (let y = 0; y < height; y += 4) {
-      for (let x = 0; x < width; x += 4) {
-        const i = (y * width + x) * 4;
-        if (data[i + 3] > 128) { // If pixel is mostly opaque
-          pixels.push({ x, y });
+    // Sample pixels to create particles
+    for (let y = 0; y < canvas.height; y += 4) {
+      for (let x = 0; x < canvas.width; x += 4) {
+        const index = (y * canvas.width + x) * 4;
+        const alpha = pixels[index + 3];
+        
+        if (alpha > 128) {
+          const colorIndex = Math.floor(Math.random() * colorPalette.length);
+          const color = colorPalette[colorIndex];
+          
+          const particle: Particle = {
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 2 + 1,
+            color: color,
+            speedX: Math.random() * 2 - 1,
+            speedY: Math.random() * 2 - 1,
+            targetX: x,
+            targetY: y
+          };
+          
+          particles.push(particle);
         }
       }
     }
     
-    return pixels;
+    return particles;
   };
   
-  // Initialize particles
-  const initParticles = (
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number,
-    pixelPositions: { x: number; y: number }[],
-    color: string
-  ) => {
-    // Clear existing particles
-    particlesRef.current = [];
-    
-    // Create particles from text pixels
-    pixelPositions.forEach((pos) => {
-      particlesRef.current.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        size: Math.random() * 2 + 1,
-        color,
-        speedX: 0,
-        speedY: 0,
-        targetX: pos.x,
-        targetY: pos.y
-      });
-    });
-  };
-  
-  // Animation loop
+  // Draw particles and animate
   const animate = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
     ctx.clearRect(0, 0, width, height);
     
-    // Draw and update particles
-    particlesRef.current.forEach((p) => {
-      // Draw particle
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
+    // Process each particle
+    particlesRef.current.forEach(particle => {
+      // Calculate direction to target
+      const dx = particle.targetX - particle.x;
+      const dy = particle.targetY - particle.y;
       
-      // Calculate distance to target
-      const dx = p.targetX - p.x;
-      const dy = p.targetY - p.y;
+      // Add some mouse influence for interactivity
+      const mouseInfluenceRange = 80;
+      const mouseDx = mousePosition.x - particle.x;
+      const mouseDy = mousePosition.y - particle.y;
+      const mouseDistance = Math.sqrt(mouseDx * mouseDx + mouseDy * mouseDy);
       
-      // Calculate distance to mouse for repulsion
-      const mouseX = mousePosRef.current.x;
-      const mouseY = mousePosRef.current.y;
-      const mdx = p.x - mouseX;
-      const mdy = p.y - mouseY;
-      const mouseDistance = Math.sqrt(mdx * mdx + mdy * mdy);
-      
-      // Apply forces - attraction to target & repulsion from mouse
-      p.speedX = dx * 0.05;
-      p.speedY = dy * 0.05;
-      
-      // Mouse repulsion effect
-      if (mouseDistance < 100) {
-        const force = (100 - mouseDistance) / 100;
-        p.speedX += (mdx / mouseDistance) * force * 4;
-        p.speedY += (mdy / mouseDistance) * force * 4;
+      // Move particles toward their targets
+      if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
+        particle.x += dx * 0.04;
+        particle.y += dy * 0.04;
       }
       
-      // Update position
-      p.x += p.speedX;
-      p.y += p.speedY;
+      // Apply mouse repulsion
+      if (mouseDistance < mouseInfluenceRange) {
+        const repulsionForce = (1 - mouseDistance / mouseInfluenceRange) * 1.5;
+        particle.x -= mouseDx * repulsionForce * 0.01;
+        particle.y -= mouseDy * repulsionForce * 0.01;
+      }
+      
+      // Add some random movement
+      particle.x += particle.speedX * 0.2;
+      particle.y += particle.speedY * 0.2;
+      
+      // Draw the particle
+      ctx.beginPath();
+      ctx.fillStyle = particle.color;
+      ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+      ctx.fill();
     });
     
     animationFrameRef.current = requestAnimationFrame(() => animate(ctx, width, height));
   };
   
-  // Handle text morphing
+  // Morph to new text
   const morphText = (
     ctx: CanvasRenderingContext2D, 
-    nextText: string, 
-    color: string,
-    width: number,
-    height: number
+    newText: string, 
+    colorPalette: string[]
   ) => {
-    const pixels = getTextPixels(ctx, nextText, 'bold', 80, 'Poppins, Arial, sans-serif', width, height);
+    const fontSize = Math.min(ctx.canvas.width / (newText.length * 0.6), 120);
+    const newParticles = createTextParticles(ctx, newText, fontSize, colorPalette);
     
-    // When we have fewer particles than needed, create new ones
-    if (particlesRef.current.length < pixels.length) {
-      const diff = pixels.length - particlesRef.current.length;
+    // Reuse existing particles if possible
+    if (particlesRef.current.length > 0) {
+      const minLength = Math.min(particlesRef.current.length, newParticles.length);
       
-      for (let i = 0; i < diff; i++) {
-        particlesRef.current.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          size: Math.random() * 2 + 1,
-          color,
-          speedX: 0,
-          speedY: 0,
-          targetX: 0,
-          targetY: 0
-        });
+      // Update targets for existing particles
+      for (let i = 0; i < minLength; i++) {
+        particlesRef.current[i].targetX = newParticles[i].targetX;
+        particlesRef.current[i].targetY = newParticles[i].targetY;
+        particlesRef.current[i].color = newParticles[i].color;
       }
-    }
-    
-    // Update targets for existing particles
-    particlesRef.current.forEach((p, i) => {
-      if (i < pixels.length) {
-        p.targetX = pixels[i].x;
-        p.targetY = pixels[i].y;
-        // Gradually change the color
-        gsap.to(p, { color, duration: 0.5 });
-      } else {
-        // Extra particles should move off screen
-        p.targetX = Math.random() * width;
-        p.targetY = height + 20;
+      
+      // Add new particles if needed
+      if (newParticles.length > particlesRef.current.length) {
+        particlesRef.current = [
+          ...particlesRef.current,
+          ...newParticles.slice(particlesRef.current.length)
+        ];
       }
-    });
-    
-    currentTextRef.current = nextText;
-  };
-  
-  // Handle mouse movement
-  const handleMouseMove = (e: MouseEvent) => {
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      mousePosRef.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      };
+      // Remove extra particles if needed
+      else if (particlesRef.current.length > newParticles.length) {
+        particlesRef.current = particlesRef.current.slice(0, newParticles.length);
+      }
+    } 
+    // Initial setup
+    else {
+      particlesRef.current = newParticles;
     }
   };
   
-  // Handle window resize
   const handleResize = (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) => {
-    if (containerRef.current) {
-      const { width, height } = containerRef.current.getBoundingClientRect();
-      canvas.width = width;
-      canvas.height = height;
-      
-      // Re-initialize the text with new dimensions
-      const pixels = getTextPixels(
-        ctx, 
-        currentTextRef.current, 
-        'bold', 
-        80,
-        'Poppins, Arial, sans-serif',
-        width,
-        height
-      );
-      
-      particlesRef.current.forEach((p, i) => {
-        if (i < pixels.length) {
-          p.targetX = pixels[i].x;
-          p.targetY = pixels[i].y;
-        }
-      });
-    }
-  };
-  
-  useEffect(() => {
-    const canvas = canvasRef.current;
     const container = containerRef.current;
+    if (!container) return;
     
-    if (!canvas || !container) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // Set initial canvas size
+    // Set canvas size to match container
     const { width, height } = container.getBoundingClientRect();
     canvas.width = width;
     canvas.height = height;
     
-    // Initial text setup
-    const initialPixels = getTextPixels(
-      ctx, 
-      texts[0], 
-      'bold', 
-      80, 
-      'Poppins, Arial, sans-serif',
-      width,
-      height
-    );
+    // Regenerate particles for the new size
+    const currentText = textOptions[currentTextIndex];
+    const fontSize = Math.min(canvas.width / (currentText.length * 0.6), 120);
+    const palette = colorPalettes[currentTextIndex % colorPalettes.length];
+    particlesRef.current = createTextParticles(ctx, currentText, fontSize, palette);
+  };
+  
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!canvasRef.current) return;
     
-    // Initialize particles
-    initParticles(ctx, width, height, initialPixels, colors[0]);
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    
+    setMousePosition({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+  
+  // Initialize canvas and animation
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Initial setup
+    handleResize(canvas, ctx);
+    
+    // Setup initial text
+    const text = textOptions[currentTextIndex];
+    const palette = colorPalettes[currentTextIndex % colorPalettes.length];
+    const fontSize = Math.min(canvas.width / (text.length * 0.6), 120);
+    particlesRef.current = createTextParticles(ctx, text, fontSize, palette);
     
     // Start animation
-    animate(ctx, width, height);
+    animate(ctx, canvas.width, canvas.height);
     
-    // Set up mouse move event
-    window.addEventListener('mousemove', handleMouseMove);
+    // Listen for window resize
+    window.addEventListener('resize', () => handleResize(canvas, ctx));
     
-    // Set up resize event
-    const handleResizeEvent = () => handleResize(canvas, ctx);
-    window.addEventListener('resize', handleResizeEvent);
+    // Mouse move listener
+    canvas.addEventListener('mousemove', handleMouseMove);
     
-    // Set up text changing interval
-    const textInterval = setInterval(() => {
-      const nextIndex = (currentTextIndex + 1) % texts.length;
+    // Text change interval
+    const textChangeInterval = setInterval(() => {
+      const nextIndex = (currentTextIndex + 1) % textOptions.length;
       setCurrentTextIndex(nextIndex);
-      morphText(ctx, texts[nextIndex], colors[nextIndex], width, height);
+      
+      const nextText = textOptions[nextIndex];
+      const nextPalette = colorPalettes[nextIndex % colorPalettes.length];
+      morphText(ctx, nextText, nextPalette);
     }, 4000);
     
-    // Clean up
+    // Cleanup
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('resize', handleResizeEvent);
-      clearInterval(textInterval);
+      cancelAnimationFrame(animationFrameRef.current);
+      window.removeEventListener('resize', () => handleResize(canvas, ctx));
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      clearInterval(textChangeInterval);
     };
   }, [currentTextIndex]);
   
   return (
-    <div className="py-20 bg-gray-900 relative overflow-hidden">
-      <div 
-        ref={containerRef} 
-        className="relative h-[200px] w-full flex items-center justify-center"
-      >
-        <canvas 
-          ref={canvasRef} 
-          className="absolute inset-0 w-full h-full"
-        ></canvas>
-        
-        <div className="absolute bottom-4 left-0 right-0 text-center text-white text-sm opacity-70">
-          <p>Move your cursor through the particles to see them react</p>
-        </div>
+    <div className="particle-text-morphing relative w-full h-80 my-12 overflow-hidden" ref={containerRef}>
+      <canvas 
+        ref={canvasRef} 
+        className="w-full h-full"
+      />
+      <div className="absolute bottom-4 left-0 w-full text-center text-gray-500 dark:text-gray-400 text-sm">
+        Move your mouse to interact with the particles
       </div>
     </div>
   );
