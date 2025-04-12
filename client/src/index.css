@@ -365,4 +365,271 @@
     0% { background-position: 0% center; }
     100% { background-position: 200% center; }
   }
+  
+  /* 3D Social Icons for Contact section */
+  .social-icon-3d {
+    @apply flex items-center justify-center w-12 h-12 rounded-full bg-gray-800 text-white shadow-lg;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+    transform-style: preserve-3d;
+    perspective: 500px;
+  }
+  
+  .social-icon-3d::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(100%);
+    transition: all 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  
+  .social-icon-3d:hover::before {
+    transform: translateY(0);
+  }
+  
+  .social-icon-3d i {
+    transition: all 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+    transform-style: preserve-3d;
+  }
+  
+  .social-icon-3d:hover i {
+    transform: translateZ(10px) scale(1.2) rotate(10deg);
+  }
+  
+  /* Contact section icon styles */
+  .contact-icon {
+    @apply flex items-center justify-center w-14 h-14 rounded-full text-xl text-white shadow-lg;
+    background: linear-gradient(135deg, #f97316, #3b82f6);
+    position: relative;
+    overflow: hidden;
+    transform: translateZ(0);
+    transition: all 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  
+  .contact-icon::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(45deg) translateY(-100%);
+    transition: all 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  
+  .contact-info-item:hover .contact-icon {
+    transform: translateZ(0) scale(1.1) rotate(5deg);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .contact-info-item:hover .contact-icon::after {
+    transform: rotate(45deg) translateY(0);
+  }
+  
+  /* Form input animations */
+  .input-animated {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  
+  .input-animated:focus {
+    transform: translateY(-2px);
+  }
+  
+  .input-highlight {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #f97316, #3b82f6);
+    transition: width 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  
+  .input-animated:focus + .input-highlight {
+    width: 100%;
+  }
+  
+  /* 3D perspective image hover effect */
+  .perspective-image {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transition: all 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  
+  /* Mobile-specific animations */
+  @media (max-width: 768px) {
+    /* Reduce animation intensity on mobile for better performance */
+    .perspective-image:hover {
+      transform: none !important;
+    }
+    
+    .profile-image-container:hover {
+      transform: scale(1.02) !important;
+    }
+    
+    /* Optimize particle count for mobile */
+    #particles-background {
+      opacity: 0.7;
+    }
+    
+    /* Mobile-specific touch animations */
+    .btn-primary:active, .btn-secondary:active {
+      transform: scale(0.95);
+      transition: transform 0.2s;
+    }
+    
+    .social-icon-container:active {
+      transform: scale(0.9);
+      transition: transform 0.2s;
+    }
+  }
+  
+  /* Page transition animations */
+  .page-transition-enter {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  
+  .page-transition-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 400ms, transform 400ms;
+  }
+  
+  .page-transition-exit {
+    opacity: 1;
+  }
+  
+  .page-transition-exit-active {
+    opacity: 0;
+    transition: opacity 300ms;
+  }
+  
+  /* Scroll indicator animation */
+  .scroll-indicator {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+  }
+  
+  .scroll-indicator:hover {
+    opacity: 1;
+  }
+  
+  .scroll-indicator-text {
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  
+  .scroll-indicator-line {
+    width: 2px;
+    height: 40px;
+    background: linear-gradient(to bottom, #f97316, transparent);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .scroll-indicator-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: white;
+    animation: scrollIndicator 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes scrollIndicator {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(200%); }
+  }
+  
+  /* Floating animation for background elements */
+  @keyframes float {
+    0% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-15px) translateX(10px); }
+    100% { transform: translateY(0) translateX(0); }
+  }
+  
+  @keyframes float-delayed {
+    0% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(15px) translateX(-10px); }
+    100% { transform: translateY(0) translateX(0); }
+  }
+  
+  .animate-float {
+    animation: float 10s ease-in-out infinite;
+  }
+  
+  .animate-float-delayed {
+    animation: float-delayed 12s ease-in-out infinite;
+  }
+  
+  /* Particle animations for tech icons */
+  @keyframes particle-1 {
+    0% { transform: translate(0, 0); opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 0.8; }
+    100% { transform: translate(-10px, -20px); opacity: 0; }
+  }
+  
+  @keyframes particle-2 {
+    0% { transform: translate(0, 0); opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 0.8; }
+    100% { transform: translate(10px, -15px); opacity: 0; }
+  }
+  
+  @keyframes particle-3 {
+    0% { transform: translate(0, 0); opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 0.8; }
+    100% { transform: translate(15px, 10px); opacity: 0; }
+  }
+  
+  .animate-particle-1 {
+    animation: particle-1 2s ease-out infinite;
+  }
+  
+  .animate-particle-2 {
+    animation: particle-2 2.2s ease-out infinite;
+  }
+  
+  .animate-particle-3 {
+    animation: particle-3 1.8s ease-out infinite;
+  }
+  
+  /* Progress bar highlight animation */
+  .progress-highlight {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: translateX(-100%);
+    transition: opacity 0.3s ease;
+  }
+  
+  .progress-highlight.active {
+    opacity: 1;
+    animation: progress-shine 2s ease-in-out infinite;
+  }
+  
+  @keyframes progress-shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
 }

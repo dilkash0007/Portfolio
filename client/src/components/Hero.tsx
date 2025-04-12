@@ -244,6 +244,12 @@ const Hero: FC = () => {
             <span>Ranchi, Jharkhand, India | Building digital experiences for the world</span>
           </div>
         </div>
+        
+        {/* Scroll Indicator */}
+        <div className="scroll-indicator animate__animated animate__fadeIn animate__delay-2s">
+          <span className="scroll-indicator-text text-gray-500 dark:text-gray-400">Scroll</span>
+          <div className="scroll-indicator-line"></div>
+        </div>
       </div>
     </section>
   );

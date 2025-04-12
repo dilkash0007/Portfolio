@@ -244,7 +244,9 @@ const Contact: FC = () => {
       // Shake the form to indicate error
       if (formRef.current) {
         gsap.to(formRef.current, {
-          x: [-10, 10, -10, 10, -5, 5, -2, 2, 0],
+          keyframes: {
+            x: [-10, 10, -10, 10, -5, 5, -2, 2, 0]
+          },
           duration: 0.6,
           ease: "power1.inOut"
         });
@@ -335,7 +337,9 @@ const Contact: FC = () => {
       // Error shake animation
       if (formRef.current) {
         gsap.to(formRef.current, {
-          x: [-10, 10, -10, 10, -5, 5, -2, 2, 0],
+          keyframes: {
+            x: [-10, 10, -10, 10, -5, 5, -2, 2, 0]
+          },
           duration: 0.6,
           ease: "power1.inOut"
         });
