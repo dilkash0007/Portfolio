@@ -18,6 +18,8 @@ interface Project {
 const Projects: FC = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const sectionRef = useRef<HTMLElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
   
   const projects: Project[] = [
     {
@@ -66,9 +68,69 @@ const Projects: FC = () => {
     ? projects 
     : projects.filter(project => project.categories.includes(activeFilter));
 
+  // Set up animations
   useEffect(() => {
     if (!sectionRef.current) return;
+    
+    // Heading animation
+    if (headingRef.current) {
+      const headingLine = headingRef.current.querySelector('span');
+      
+      gsap.fromTo(
+        headingRef.current,
+        { opacity: 0, y: 20 },
+        { 
+          opacity: 1, 
+          y: 0, 
+          duration: 0.8,
+          scrollTrigger: {
+            trigger: headingRef.current,
+            start: 'top 80%',
+          }
+        }
+      );
+      
+      if (headingLine) {
+        gsap.fromTo(
+          headingLine,
+          { width: '0%', left: '50%' },
+          { 
+            width: '100%', 
+            left: '0%', 
+            duration: 1, 
+            delay: 0.4, 
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: headingRef.current,
+              start: 'top 80%',
+            }
+          }
+        );
+      }
+    }
+    
+    // Filter buttons animation
+    if (filterRef.current) {
+      const buttons = filterRef.current.querySelectorAll('button');
+      
+      gsap.fromTo(
+        buttons,
+        { opacity: 0, y: 20 },
+        { 
+          opacity: 1, 
+          y: 0, 
+          duration: 0.5, 
+          stagger: 0.1,
+          delay: 0.2,
+          scrollTrigger: {
+            trigger: filterRef.current,
+            start: 'top 80%',
+          }
+        }
+      );
+    }
 
+    // Project cards animation
     const timeline = gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
@@ -76,13 +138,24 @@ const Projects: FC = () => {
       }
     });
 
-    timeline.from('.project-card', {
-      y: 50,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.2,
-      ease: 'power3.out'
-    });
+    timeline.fromTo(
+      '.project-card',
+      { 
+        y: 50, 
+        opacity: 0, 
+        rotateY: 5,
+        scale: 0.95
+      },
+      {
+        y: 0,
+        opacity: 1,
+        rotateY: 0,
+        scale: 1,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: 'power3.out'
+      }
+    );
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -93,7 +166,7 @@ const Projects: FC = () => {
     <section id="projects" ref={sectionRef} className="py-20 bg-white dark:bg-gray-900">
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold font-poppins mb-4 relative inline-block">
+          <h2 ref={headingRef} className="text-3xl md:text-4xl font-bold font-poppins mb-4 relative inline-block">
             My Projects
             <span className="absolute bottom-0 left-0 w-full h-1 bg-orange-500 rounded transform"></span>
           </h2>
@@ -103,7 +176,7 @@ const Projects: FC = () => {
         </div>
         
         <div className="mb-8 flex justify-center">
-          <div className="inline-flex p-1 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm">
+          <div ref={filterRef} className="inline-flex p-1 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm">
             <button 
               className={`px-4 py-2 rounded-md text-sm font-medium transition ${
                 activeFilter === 'all' 
