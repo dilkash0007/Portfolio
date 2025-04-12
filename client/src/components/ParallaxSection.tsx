@@ -124,55 +124,7 @@ const ParallaxSection: FC = () => {
         </p>
       </div>
       
-      {/* CSS for cloud animations */}
-      <style jsx>{`
-        @keyframes twinkle {
-          0% { opacity: 0.3; }
-          100% { opacity: 1; }
-        }
-        
-        .cloud {
-          position: relative;
-          animation: float 20s infinite alternate ease-in-out;
-        }
-        
-        .cloud:nth-child(2) {
-          animation-duration: 25s;
-          animation-delay: -3s;
-        }
-        
-        .cloud:nth-child(3) {
-          animation-duration: 18s;
-          animation-delay: -5s;
-        }
-        
-        .cloud:nth-child(4) {
-          animation-duration: 22s;
-          animation-delay: -8s;
-        }
-        
-        .cloud:before,
-        .cloud:after {
-          content: '';
-          position: absolute;
-          top: -50%;
-          left: 10%;
-          width: 50%;
-          height: 100%;
-          border-radius: 50%;
-          background-color: inherit;
-        }
-        
-        .cloud:after {
-          left: 40%;
-        }
-        
-        @keyframes float {
-          0% { transform: translateX(0); }
-          50% { transform: translateX(20px); }
-          100% { transform: translateX(0); }
-        }
-      `}</style>
+      {/* CSS for cloud animations is added to index.css instead */}
     </section>
   );
 };

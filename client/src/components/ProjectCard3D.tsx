@@ -1,6 +1,5 @@
 import { FC, useRef, useEffect } from 'react';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Project } from '@/types';
 import { gsap } from 'gsap';
 
@@ -38,13 +37,9 @@ const ProjectCard3D: FC<ProjectCard3DProps> = ({ project, index }) => {
     renderer.setClearColor(0x000000, 0);
     rendererRef.current = renderer;
     
-    // Add orbit controls for interaction
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.1;
-    controls.enableZoom = false;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 3;
+    // Set up auto-rotation variables
+    let autoRotate = true;
+    const autoRotateSpeed = 0.01;
     
     // Create a texture loader
     const textureLoader = new THREE.TextureLoader();
@@ -113,9 +108,13 @@ const ProjectCard3D: FC<ProjectCard3DProps> = ({ project, index }) => {
       if (boxRef.current) {
         // Subtle floating animation
         boxRef.current.position.y = Math.sin(Date.now() * 0.001) * 0.2;
+        
+        // Auto-rotate the box if enabled
+        if (autoRotate) {
+          boxRef.current.rotation.y += autoRotateSpeed;
+        }
       }
       
-      controls.update();
       renderer.render(scene, camera);
     };
     
@@ -123,9 +122,8 @@ const ProjectCard3D: FC<ProjectCard3DProps> = ({ project, index }) => {
     
     // Hover effects
     const handleMouseEnter = () => {
-      if (controls) {
-        controls.autoRotate = false;
-      }
+      // Stop auto-rotation on hover
+      autoRotate = false;
       
       if (boxRef.current) {
         gsap.to(boxRef.current.scale, {
@@ -139,9 +137,8 @@ const ProjectCard3D: FC<ProjectCard3DProps> = ({ project, index }) => {
     };
     
     const handleMouseLeave = () => {
-      if (controls) {
-        controls.autoRotate = true;
-      }
+      // Resume auto-rotation
+      autoRotate = true;
       
       if (boxRef.current) {
         gsap.to(boxRef.current.scale, {
@@ -160,7 +157,6 @@ const ProjectCard3D: FC<ProjectCard3DProps> = ({ project, index }) => {
     // Clean up on unmount
     return () => {
       cancelAnimationFrame(frameId);
-      controls.dispose();
       renderer.dispose();
       containerRef.current?.removeEventListener('mouseenter', handleMouseEnter);
       containerRef.current?.removeEventListener('mouseleave', handleMouseLeave);
